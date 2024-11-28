@@ -1,0 +1,52 @@
+### 200 valid CEP (POST)
+# curl --location 'http://localhost:8080'
+#--header 'Content-Type: application/json'
+#--data '{
+#  "cep": "89221220"
+#}'
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+  "cep": "89221220"
+}
+
+### 422 invalid CEP (POST)
+# curl --location 'http://localhost:8080'
+#--header 'Content-Type: application/json'
+#--data '{
+#  "cep": "123456"
+#}'
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+  "cep": "123456"
+}
+
+### 404 not found CEP (POST)
+# curl --location 'http://localhost:8080'
+#--header 'Content-Type: application/json'
+#--data '{
+#  "cep": "08888008"
+#}'
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+  "cep": "08888008"
+}
+
+### 404 not found CEP (GET)
+# curl --location 'http://localhost:8081/99999999'
+GET http://localhost:8081/99999999
+
+
+#### 200 valid CEP (GET)
+# curl --location 'http://localhost:8081/89221220'
+GET http://localhost:8081/89221220
+
+
+### 422 invalid CEP (GET)
+# curl --location 'http://localhost:8081/123456'
+GET http://localhost:8081/123456

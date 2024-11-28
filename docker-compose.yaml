@@ -1,0 +1,59 @@
+services:
+  otel-collector:
+    container_name: otel-collector
+    image: otel/opentelemetry-collector:latest
+    restart: always
+    command: ["--config", "/otel-collector-config.yml"]
+    volumes:
+      - ./.docker/otel-collector-config.yml:/otel-collector-config.yml
+    ports:
+      - '4317:4317'
+    networks:
+      - otel-network
+
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin-slim:latest
+    depends_on:
+      - otel-collector
+    ports:
+      - '9411:9411'
+    networks:
+      - otel-network
+
+  goapp-service-a:
+    container_name: goapp-a-cep-input
+    build:
+      context: ./service-a-cep-input
+      dockerfile: Dockerfile
+    ports:
+      - '8080:8080'
+    depends_on:
+      - zipkin
+      - otel-collector
+      - goapp-service-b
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=goapp-service-a
+    networks:
+      - otel-network
+
+  goapp-service-b:
+    container_name: goapp-b-weather-api
+    build:
+      context: ./service-b-weather-api
+      dockerfile: Dockerfile
+    ports:
+      - '8081:8081'
+    depends_on:
+      - zipkin
+      - otel-collector
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=goapp-service-b
+    networks:
+      - otel-network
+
+networks:
+  otel-network:
+    driver: bridge
